@@ -1,15 +1,18 @@
 package club.urvogel.bletest
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.util.Log
+import no.nordicsemi.android.ble.Request
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 
 class Device {
+    val tag = "Device"
     var bluetoothDevice: BluetoothDevice
     var name: String? = null
     var rssi: Int? = null
     var isBonded = false
-    var bluetoothManager: BluetoothManager? = null
+    var uartManager: UARTManager? = null
 
     constructor(scanResult: ScanResult) {
         bluetoothDevice = scanResult.device
@@ -29,7 +32,31 @@ class Device {
         return bluetoothDevice.address == scanResult.device.address
     }
 
+    fun b2s(b: Boolean): String = if(b) "t" else "f"
+
     override fun toString(): String {
-        return "bond:" + (if(isBonded) "t" else "f") + " addr:" + bluetoothDevice.address + " " + name
+        val connected = uartManager?.isReady ?: false
+        return "bond:" + b2s(isBonded) + " connected:" + b2s(connected) + " addr:" + bluetoothDevice.address + " " + name
+    }
+
+    fun toggleConnect(context: Context): Request {
+        if (uartManager == null) {
+            uartManager = UARTManager(context)
+        }
+        if (uartManager!!.isReady) {
+            return uartManager!!.disconnect()
+        } else {
+            val req = uartManager!!.connect(bluetoothDevice).useAutoConnect(false)
+            if (bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED) {
+                req.timeout(10000)
+            }
+            req.done {
+                isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
+            }.fail { _, status ->
+                Log.e(tag, "status:${status}")
+                isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
+            }
+            return req
+        }
     }
 }

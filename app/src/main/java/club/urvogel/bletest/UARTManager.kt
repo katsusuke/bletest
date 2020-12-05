@@ -12,19 +12,9 @@ import no.nordicsemi.android.ble.data.Data
 import java.util.*
 
 class UARTManager: BleManager {
-    val mBluetoothDevice: BluetoothDevice
-    private val gattCallback: UARTBleManagerGattCallback
+    constructor(context: Context): super(context)
 
-    constructor(context: Context, bluetoothDevice: BluetoothDevice): super(context){
-        mBluetoothDevice = bluetoothDevice
-        gattCallback = UARTBleManagerGattCallback(bluetoothDevice)
-    }
-
-    override fun getGattCallback(): BleManagerGattCallback {
-        return gattCallback
-    }
-
-    private inner class UARTBleManagerGattCallback(mBluetoothDevice: BluetoothDevice) : BleManagerGattCallback(), DataReceivedCallback {
+    private inner class UARTBleManagerGattCallback : BleManagerGattCallback(), DataReceivedCallback {
         val tag = "UARTManager.UARTBleManagerGattCallback"
         var mRXCharacteristic: BluetoothGattCharacteristic? = null
         var mTXCharacteristic:BluetoothGattCharacteristic? = null
@@ -75,5 +65,12 @@ class UARTManager: BleManager {
         override fun onDataReceived(device: BluetoothDevice, data: Data) {
             Log.i(tag, "onDataReceived(${device.address}, ${data.value})")
         }
+    }
+
+    override fun getGattCallback(): BleManagerGattCallback {
+        return UARTBleManagerGattCallback()
+    }
+    override fun log(priority: Int, message: String) {
+        Log.println(priority, "UARTManager", message)
     }
 }

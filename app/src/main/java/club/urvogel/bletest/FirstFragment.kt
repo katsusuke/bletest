@@ -65,10 +65,19 @@ class FirstFragment : Fragment() {
             mList.list
         )
         listView.adapter = arrayAdapter
-        listView.setOnItemClickListener(OnItemClickListener { parent, view, position, id ->
-            val msg = "$position clicked"
-            Snackbar.make(view, msg, Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        listView.setOnItemClickListener(OnItemClickListener { _, _, position, _ ->
+            val device = mList.list[position]
+            Handler(Looper.getMainLooper()).postDelayed({
+                Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG).setAction("Action", null)
+            }, 100)
+            device.toggleConnect(context as Context).done {
+                arrayAdapter.notifyDataSetChanged()
+                val connected = if (device.uartManager?.isConnected == true) "Connected" else "Disconnected"
+                Snackbar.make(view, connected, Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            }.fail { device, status ->
+                arrayAdapter.notifyDataSetChanged()
+                Snackbar.make(view, "Failed ${device.address} status:${status}", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            }.enqueue()
         })
         return view
     }
