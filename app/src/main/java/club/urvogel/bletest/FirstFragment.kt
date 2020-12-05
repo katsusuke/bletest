@@ -8,7 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.*
-import android.webkit.PermissionRequest
+import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
@@ -18,6 +18,7 @@ import com.fondesa.kpermissions.anyPermanentlyDenied
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.google.android.material.snackbar.Snackbar
 import no.nordicsemi.android.support.v18.scanner.*
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -64,6 +65,11 @@ class FirstFragment : Fragment() {
             mList.list
         )
         listView.adapter = arrayAdapter
+        listView.setOnItemClickListener(OnItemClickListener { parent, view, position, id ->
+            val msg = "$position clicked"
+            Snackbar.make(view, msg, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show()
+        })
         return view
     }
 
@@ -131,8 +137,7 @@ class FirstFragment : Fragment() {
                 .setLegacy(false)
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(1000)
                 .setUseHardwareBatchingIfSupported(false).build()
-            val filters = ArrayList<ScanFilter>()
-            mScanner.startScan(filters, settings, mScanCallback)
+            mScanner.startScan(ArrayList<ScanFilter>(), settings, mScanCallback)
             Handler(Looper.getMainLooper()).postDelayed({
                 mScanner.stopScan(mScanCallback)
             }, 3000)
