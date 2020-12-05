@@ -19,7 +19,7 @@ class FirstFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_first, container, false)
-        listView = view.findViewById(R.id.listView)
+        listView = view.findViewById(R.id.list_view)
         val texts = arrayOf(
             "abc ", "bcd", "cde", "def", "efg",
             "fgh", "ghi", "hij", "ijk", "jkl",
