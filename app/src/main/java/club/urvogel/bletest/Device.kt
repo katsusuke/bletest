@@ -28,6 +28,6 @@ class Device {
     }
 
     override fun toString(): String {
-        return "bond:" + (if(isBonded) "t" else "f") + " " + name + " addr:" + bluetoothDevice.address
+        return "bond:" + (if(isBonded) "t" else "f") + " addr:" + bluetoothDevice.address + " " + name
     }
 }
