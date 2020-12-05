@@ -1,6 +1,7 @@
 package club.urvogel.bletest
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 
 class Device {
@@ -8,6 +9,7 @@ class Device {
     var name: String? = null
     var rssi: Int? = null
     var isBonded = false
+    var bluetoothManager: BluetoothManager? = null
 
     constructor(scanResult: ScanResult) {
         bluetoothDevice = scanResult.device
