@@ -9,10 +9,13 @@ import android.util.Log
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.callback.DataReceivedCallback
 import no.nordicsemi.android.ble.data.Data
+import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.log.Logger
 import java.util.*
 
-class UARTManager: BleManager {
-    constructor(context: Context): super(context)
+class UARTManager(context: Context, val name: String): BleManager(context) {
+    val tag = "UARTManager"
+    val logSession = Logger.newSession(context, "bletest", name)
 
     private inner class UARTBleManagerGattCallback : BleManagerGattCallback(), DataReceivedCallback {
         val tag = "UARTManager.UARTBleManagerGattCallback"
@@ -71,6 +74,7 @@ class UARTManager: BleManager {
         return UARTBleManagerGattCallback()
     }
     override fun log(priority: Int, message: String) {
-        Log.println(priority, "UARTManager", message)
+        Log.println(priority, tag, message)
+        Logger.log(logSession, LogContract.Log.Level.fromPriority(priority), message)
     }
 }

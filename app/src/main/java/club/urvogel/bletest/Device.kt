@@ -41,7 +41,8 @@ class Device {
 
     fun toggleConnect(context: Context): Request {
         if (uartManager == null) {
-            uartManager = UARTManager(context)
+            val n = if ( name == null) bluetoothDevice.address else name
+            uartManager = UARTManager(context, n as String)
         }
         if (uartManager!!.isReady) {
             return uartManager!!.disconnect()
@@ -53,7 +54,7 @@ class Device {
             req.done {
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
             }.fail { _, status ->
-                Log.e(tag, "status:${status}")
+                Log.e(tag, "fail status:${status}")
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
             }
             return req
