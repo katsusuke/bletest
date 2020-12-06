@@ -67,19 +67,30 @@ class FirstFragment : Fragment() {
         listView.adapter = arrayAdapter
         listView.setOnItemClickListener(OnItemClickListener { _, _, position, _ ->
             val device = mList.list[position]
-            Handler(Looper.getMainLooper()).postDelayed({
-                Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            }, 100)
-            device.toggleConnect(context as Context).done {
-                arrayAdapter.notifyDataSetChanged()
-                val connected = if (device.uartManager?.isConnected == true) "Connected" else "Disconnected"
-                Snackbar.make(view, connected, Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            }.fail { device, status ->
-                arrayAdapter.notifyDataSetChanged()
-                Snackbar.make(view, "Failed ${device.address} status:${status}", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            }.enqueue()
+            toggleConnect(view, device)
         })
         return view
+    }
+
+    private fun toggleConnect(view: View, device: Device) {
+        Handler(Looper.getMainLooper()).postDelayed({
+            Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show()
+        }, 100)
+        device.toggleConnect(context as Context).done {
+            arrayAdapter.notifyDataSetChanged()
+            val connected =
+                if (device.uartManager?.isConnected == true) "Connected" else "Disconnected"
+            Handler(Looper.getMainLooper()).postDelayed({
+                Snackbar.make(view, connected, Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            }, 100)
+        }.fail { device, status ->
+            arrayAdapter.notifyDataSetChanged()
+            Handler(Looper.getMainLooper()).postDelayed({
+                Snackbar.make(view, "Failed ${device.address} status:${status}", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+            }, 100)
+        }.enqueue()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

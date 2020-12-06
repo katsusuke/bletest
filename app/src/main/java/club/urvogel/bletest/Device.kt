@@ -48,7 +48,7 @@ class Device {
         } else {
             val req = uartManager!!.connect(bluetoothDevice).useAutoConnect(false)
             if (bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED) {
-                req.timeout(10000)
+                req.timeout(5000)
             }
             req.done {
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
