@@ -31,7 +31,6 @@ class FirstFragment : Fragment() {
             Manifest.permission.BLUETOOTH
         ).build()
     }
-
     lateinit var listView: ListView
     lateinit var arrayAdapter: ArrayAdapter<Device>
 
@@ -77,26 +76,33 @@ class FirstFragment : Fragment() {
             Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }, 100)
-        val req = device.toggleConnect(context as Context, device.isBonded)
+        val req = device.toggleConnect(context as Context, device.isBonded, getBluetoothAdapter().getBondedDevices())
         if (req != null) {
             req.done {
                 arrayAdapter.notifyDataSetChanged()
-                val connected =
-                        if (device.uartManager?.isConnected == true) "Connected" else "Disconnected"
+                showSnackbar(if (device.uartManager?.isConnected == true) "Connected" else "Disconnected")
                 Handler(Looper.getMainLooper()).postDelayed({
-                    Snackbar.make(view, connected, Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                }, 100)
-            }.fail { device, status ->
+                    toggleConnect(view, device)
+                }, 500)
+            }.fail { bluetoothDevice, status ->
                 arrayAdapter.notifyDataSetChanged()
+                showSnackbar("Failed ${bluetoothDevice.address} status:${status}")
+
                 Handler(Looper.getMainLooper()).postDelayed({
-                    Snackbar.make(view, "Failed ${device.address} status:${status}", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show()
-                }, 100)
+                    toggleConnect(view, device)
+                }, 500)
             }.enqueue()
         } else {
-            Snackbar.make(view, "Failed ${device.bluetoothDevice.address} bonding removed!!", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            showSnackbar("Failed ${device.bluetoothDevice.address} bonding removed!!")
         }
+    }
+
+    fun showSnackbar(message: String) {
+        Handler(Looper.getMainLooper()).postDelayed({
+            Snackbar.make(view as View, message, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }, 100)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -166,6 +172,7 @@ class FirstFragment : Fragment() {
             mScanner.startScan(ArrayList<ScanFilter>(), settings, mScanCallback)
             Handler(Looper.getMainLooper()).postDelayed({
                 mScanner.stopScan(mScanCallback)
+                showSnackbar("Scan finished")
             }, 3000)
 
         } catch (ex: Exception) {

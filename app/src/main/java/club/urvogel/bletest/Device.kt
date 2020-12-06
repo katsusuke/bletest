@@ -39,7 +39,7 @@ class Device {
         return "bond:" + b2s(isBonded) + " connected:" + b2s(connected) + " addr:" + bluetoothDevice.address + " " + name
     }
 
-    fun toggleConnect(context: Context, previousBonded: Boolean): Request? {
+    fun toggleConnect(context: Context, previousBonded: Boolean, bondedDevices: Set<BluetoothDevice>): Request? {
         if (uartManager == null) {
             val n = if ( name == null) bluetoothDevice.address else name
             uartManager = UARTManager(context, n as String)
@@ -49,13 +49,17 @@ class Device {
         } else {
             val req = uartManager!!.connect(bluetoothDevice).useAutoConnect(false)
             if (bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED) {
-                req.timeout(5000)
+                if (!bondedDevices.contains(bluetoothDevice)) {
+                    return null
+                }
+                req.timeout(3000)
             } else if(previousBonded) {
                 return null
             }
             req.done {
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
             }.fail { _, status ->
+                // status is no.nordicsemi.android.ble.callback.FailCallback
                 Log.e(tag, "fail status:${status}")
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
             }
