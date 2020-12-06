@@ -39,7 +39,7 @@ class Device {
         return "bond:" + b2s(isBonded) + " connected:" + b2s(connected) + " addr:" + bluetoothDevice.address + " " + name
     }
 
-    fun toggleConnect(context: Context): Request {
+    fun toggleConnect(context: Context, previousBonded: Boolean): Request? {
         if (uartManager == null) {
             val n = if ( name == null) bluetoothDevice.address else name
             uartManager = UARTManager(context, n as String)
@@ -50,6 +50,8 @@ class Device {
             val req = uartManager!!.connect(bluetoothDevice).useAutoConnect(false)
             if (bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED) {
                 req.timeout(5000)
+            } else if(previousBonded) {
+                return null
             }
             req.done {
                 isBonded = bluetoothDevice.bondState == BluetoothDevice.BOND_BONDED
