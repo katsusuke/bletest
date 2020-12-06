@@ -68,7 +68,7 @@ class FirstFragment : Fragment() {
         listView.setOnItemClickListener(OnItemClickListener { _, _, position, _ ->
             val device = mList.list[position]
             Handler(Looper.getMainLooper()).postDelayed({
-                Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG).setAction("Action", null)
+                Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             }, 100)
             device.toggleConnect(context as Context).done {
                 arrayAdapter.notifyDataSetChanged()
