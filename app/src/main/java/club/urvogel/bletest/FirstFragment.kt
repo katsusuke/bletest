@@ -26,7 +26,7 @@ import no.nordicsemi.android.support.v18.scanner.*
 class FirstFragment : Fragment() {
     private val request by lazy {
         permissionsBuilder(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.BLUETOOTH
         ).build()
@@ -73,7 +73,7 @@ class FirstFragment : Fragment() {
 
     private fun toggleConnect(view: View, device: Device) {
         Handler(Looper.getMainLooper()).postDelayed({
-            Snackbar.make(view, "${device.bluetoothDevice.address} clicked", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Connecting... ${device.bluetoothDevice.address}", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }, 100)
         val req = device.toggleConnect(context as Context, device.isBonded, getBluetoothAdapter().getBondedDevices())
