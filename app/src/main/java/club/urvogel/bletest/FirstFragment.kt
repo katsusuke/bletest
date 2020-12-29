@@ -18,6 +18,7 @@ import com.fondesa.kpermissions.anyPermanentlyDenied
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.google.android.material.snackbar.Snackbar
 import no.nordicsemi.android.support.v18.scanner.*
+import java.util.Objects
 
 
 /**
@@ -33,19 +34,13 @@ class FirstFragment : Fragment() {
     }
     lateinit var listView: ListView
     lateinit var arrayAdapter: ArrayAdapter<Device>
+    private var toggling: Boolean = false
+    private val lock = Object()
 
     var mScanner: BluetoothLeScannerCompat = BluetoothLeScannerCompat.getScanner()
     val mList = DeviceList()
 
     private val mScanCallback: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-        }
-
-        override fun onScanFailed(intErrorCode: Int) {
-            super.onScanFailed(intErrorCode)
-        }
-
         override fun onBatchScanResults(results: List<ScanResult>) {
             mList.update(results)
             arrayAdapter.notifyDataSetChanged()
@@ -65,8 +60,13 @@ class FirstFragment : Fragment() {
         )
         listView.adapter = arrayAdapter
         listView.setOnItemClickListener(OnItemClickListener { _, _, position, _ ->
-            val device = mList.list[position]
-            toggleConnect(view, device)
+            synchronized(lock) {
+                if (!toggling) {
+                    toggling = true
+                    val device = mList.list[position]
+                    toggleConnect(view, device)
+                }
+            }
         })
         return view
     }
@@ -94,6 +94,7 @@ class FirstFragment : Fragment() {
             }.enqueue()
         } else {
             showSnackbar("Failed ${device.bluetoothDevice.address} bonding removed!!")
+            synchronized(lock) { toggling = false }
         }
     }
 
@@ -103,10 +104,6 @@ class FirstFragment : Fragment() {
                     .setAction("Action", null).show()
         }, 100)
 
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
